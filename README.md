@@ -1,6 +1,6 @@
 # DNS server
 
-This script sets up a DNS server that we can an error or a specific IP address for certain domain requests.
+This script sets up a DNS server were we can control to return diffent errors to and specific domain. If the domain ask for is not the blocked list it will query customDNSServer to obtain the real IP.
 
 ## Instalation
 
