@@ -1,0 +1,14 @@
+{
+	"name": "dnsserver",
+	"version": "1.0.0",
+	"description": "Based on https://github.com/sh1mmer/dnsserver.js.git/",
+	"main": "dnsserver.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"dns2": "^2.1.0"
+	}
+}
