@@ -1,6 +1,6 @@
 # DNS server
 
-This script sets up a DNS server that we can manipulate to return an error or a specific IP address for certain domain requests.
+This script sets up a DNS server that we can an error or a specific IP address for certain domain requests.
 
 ## Instalation
 
