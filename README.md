@@ -53,3 +53,65 @@ To execute the server you only need to type:
 ```bash
 node DNSserver.js
 ```
+
+If we query for example.com we get the following logs in the server
+
+```bash
+{ udp: { address: '0.0.0.0', family: 'IPv4', port: 5333 } }
+Domain example.com is blocked. Responding with ERROR 5
+64701 { name: 'example.com', type: 1, class: 1 }
+```
+and the following response to the client:
+
+```bash
+$ dig @localhost -p 5333 example.com
+
+; <<>> DiG 9.10.6 <<>> @localhost -p 5333 example.com
+; (2 servers found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: REFUSED, id: 64701
+;; flags: qr rd ad; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0
+;; WARNING: recursion requested but not available
+
+;; QUESTION SECTION:
+;example.com.                   IN      A
+
+;; Query time: 1 msec
+;; SERVER: 127.0.0.1#5333(127.0.0.1)
+;; WHEN: Sat Dec 16 21:19:56 CET 2023
+;; MSG SIZE  rcvd: 29
+```
+
+
+if we query for a domianin different from example.com and example2.com we get the following logs in the server
+
+```bash
+{ udp: { address: '0.0.0.0', family: 'IPv4', port: 5333 } }
+35099 { name: 'marca.com', type: 1, class: 1 }
+Querying DNS (80.58.61.250) for domain: marca.com
+```
+and the following response to the client:
+
+```bash
+dig @localhost -p 5333 marca.com  
+
+; <<>> DiG 9.10.6 <<>> @localhost -p 5333 marca.com
+; (2 servers found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 35099
+;; flags: qr rd ad; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0
+;; WARNING: recursion requested but not available
+
+;; QUESTION SECTION:
+;marca.com.                     IN      A
+
+;; ANSWER SECTION:
+marca.com.              300     IN      A       34.147.120.111
+
+;; Query time: 10 msec
+;; SERVER: 127.0.0.1#5333(127.0.0.1)
+;; WHEN: Sat Dec 16 21:22:24 CET 2023
+;; MSG SIZE  rcvd: 52
+```
