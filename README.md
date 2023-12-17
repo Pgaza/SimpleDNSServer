@@ -33,6 +33,7 @@ const rcodeList = {
 	XRRSET: 7,
 	NOTAUTH: 8,
 	NOTZONE: 9,
+	TIMEOUT: 666,
 };
 
 // Lista de dominios a los que se responderá con el codigo de error indicado en rcode
