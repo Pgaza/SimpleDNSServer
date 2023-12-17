@@ -27,6 +27,7 @@
 // ###################################################################################################################################
 const dns2 = require("dns2");
 const dns = require("node:dns");
+const pc = require("picocolors");
 const { Packet } = dns2;
 
 //##############################################################################################
@@ -50,17 +51,22 @@ const rcodeList = {
 	XRRSET: 7,
 	NOTAUTH: 8,
 	NOTZONE: 9,
+	TIMEOUT: 666,
 };
 
 // Lista de dominios a los que se responderá con el codigo de error indicado en rcode
 const blockedDomains = [
 	{
 		name: "example.com",
-		rcode: buscarValorPorNombre("REFUSED"),
+		rcode: rcodeList["REFUSED"],
 	},
 	{
 		name: "example2.com",
-		rcode: buscarValorPorNombre("SERVFAIL"),
+		rcode: rcodeList["SERVFAIL"],
+	},
+	{
+		name: "example3.com",
+		rcode: rcodeList["TIMEOUT"],
 	},
 ];
 
@@ -74,27 +80,56 @@ function getRCodeForDomain(domain) {
 	return (entry = blockedDomains.find((entry) => entry.name === domain));
 }
 
-function buscarValorPorNombre(nombre) {
-	// Verificar si la cadena existe en la asociación
-	if (rcodeList.hasOwnProperty(nombre)) {
-		return rcodeList[nombre];
-	} else {
-		return "No se encontró la cadena en la asociación";
-		process.exit(1);
+// function buscarValorPorNombre(nombre) {
+// 	// Verificar si la cadena existe en la asociación
+// 	if (rcodeList.hasOwnProperty(nombre)) {
+// 		return rcodeList[nombre];
+// 	} else {
+// 		return "No se encontró la cadena en la asociación";
+// 		process.exit(1);
+// 	}
+// }
+
+function obtenerNombrePorValor(valor) {
+	for (const nombre in rcodeList) {
+		if (rcodeList[nombre] === valor) return nombre;
 	}
+	return "";
 }
 
+function debug(text) {
+	const fechaConHora = new Date();
+	const hora = fechaConHora.getHours().toString().padStart(2, "0");
+	const minutos = fechaConHora.getMinutes().toString().padStart(2, "0");
+	const segundos = fechaConHora.getSeconds().toString().padStart(2, "0");
+	const milisegundos = fechaConHora.getMilliseconds().toString().padStart(3, "0");
+	const horaString = `${hora}:${minutos}:${segundos}.${milisegundos}`;
+	console.log(`${pc.bold(pc.white(horaString))} ${text}`);
+}
 // Creamos el servidor que atenderá las operaciones
 const server = dns2.createServer({
 	udp: true,
 
 	handle: (request, send, rinfo) => {
 		const domain = request.questions[0].name;
+		//debug(`Peticion dominio ${pc.yellow(domain)}`);
 
 		if (blockedDomains.some((entry) => entry.name === domain)) {
 			// Tenemos un servidor
 			const { rcode } = getRCodeForDomain(domain);
-			console.log(`Domain ${domain} is blocked. Responding with ERROR ${rcode}`);
+			// Miramos si es un timeout
+			if (rcode == rcodeList.TIMEOUT) {
+				debug(
+					`Domain ${pc.yellow(domain)} is blocked. No responding so we must get a ${pc.red(
+						"TIMEOUT"
+					)} in the DNS client`
+				);
+				return;
+			}
+			// Llegado aqui no es un timeout seguimos adelante...
+			debug(
+				`Domain ${pc.yellow(domain)} is blocked. Responding with ${pc.red(obtenerNombrePorValor(rcode))} (${rcode})`
+			);
 			const response = Packet.createResponseFromRequest(request);
 			response.header.rcode = rcode;
 			send(response);
@@ -102,12 +137,16 @@ const server = dns2.createServer({
 			const DNSOptions = { question: request.questions[0] };
 			dns.resolve4(domain, DNSOptions, (err, addresses) => {
 				if (err) {
-					console.error(`Error querying DNS ${customDNSServer}: ${err.message}`);
 					const response = Packet.createResponseFromRequest(request);
-					response.header.rcode = buscarValorPorNombre("SERVFAIL");
+					response.header.rcode = rcodeList.NXDOMAIN;
+					debug(
+						`Error querying DNS ${customDNSServer}: ${err.message}. Responding with ${pc.red(
+							obtenerNombrePorValor(response.header.rcode)
+						)} (${response.header.rcode})`
+					);
 					send(response);
 				} else {
-					console.log(`Querying DNS (${customDNSServer}) for domain: ${domain}`);
+					debug(`Querying DNS (${customDNSServer}) for domain: ${pc.yellow(domain)}. Responding IP ${addresses[0]}`);
 					const response = Packet.createResponseFromRequest(request);
 					const [question] = request.questions;
 					const { name } = question;
@@ -126,7 +165,7 @@ const server = dns2.createServer({
 });
 
 server.on("request", (request, response, rinfo) => {
-	console.log(request.header.id, request.questions[0]);
+	//console.log("Peticion: " + request.header.id, request.questions[0]);
 });
 
 server.on("requestError", (error) => {
@@ -134,7 +173,9 @@ server.on("requestError", (error) => {
 });
 
 server.on("listening", () => {
-	console.log(server.addresses());
+	debug(
+		`Started DNS server in addess ${pc.green(server.addresses().udp.address)}:${pc.green(server.addresses().udp.port)}`
+	);
 });
 
 server.on("close", () => {

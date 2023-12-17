@@ -9,6 +9,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"dns2": "^2.1.0"
+		"dns2": "^2.1.0",
+		"picocolors": "^1.0.0"
 	}
 }
