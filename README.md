@@ -46,6 +46,10 @@ const blockedDomains = [
 		name: "example2.com",
 		rcode: buscarValorPorNombre("SERVFAIL"),
 	},
+	{
+		name: "example3.com",
+		rcode: rcodeList["TIMEOUT"],
+	},
 ];
 ```
 
