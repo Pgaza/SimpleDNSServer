@@ -40,11 +40,11 @@ const rcodeList = {
 const blockedDomains = [
 	{
 		name: "example.com",
-		rcode: buscarValorPorNombre("REFUSED"),
+		rcode: rcodeList["REFUSED"],
 	},
 	{
 		name: "example2.com",
-		rcode: buscarValorPorNombre("SERVFAIL"),
+		rcode: rcodeList["SERVFAIL"],
 	},
 	{
 		name: "example3.com",
@@ -59,12 +59,13 @@ To execute the server you only need to type:
 node DNSserver.js
 ```
 
-If we query for domain *example2.com* we get the following logs in the server
+If we query for domain _example2.com_ we get the following logs in the server
 
 ```bash
 22:30:17.375 Started DNS server in addess 0.0.0.0:5333
 22:32:04.229 Domain example.com is blocked. Responding with REFUSED (5)
 ```
+
 and the following response to the client:
 
 ```bash
@@ -87,13 +88,13 @@ $ dig @localhost -p 5333 example.com
 ;; MSG SIZE  rcvd: 29
 ```
 
-
-If we query for domain *example2.com* we get the following logs in the server
+If we query for domain _example2.com_ we get the following logs in the server
 
 ```bash
 22:30:17.375 Started DNS server in addess 0.0.0.0:5333
 22:33:13.400 Domain example2.com is blocked. Responding with SERVFAIL (2)
 ```
+
 and the following response to the client:
 
 ```bash
@@ -116,7 +117,7 @@ dig @localhost -p 5333 example2.com
 ;; MSG SIZE  rcvd: 30
 ```
 
-If we query for domain *example3.com* we get the following logs in the server (we see 3 queries because dig try 3 times wiht 5 seconds between them)
+If we query for domain _example3.com_ we get the following logs in the server (we see 3 queries because dig try 3 times wiht 5 seconds between them)
 
 ```bash
 22:34:49.356 Domain example3.com is blocked. No responding so we must get a TIMEOUT in the DNS client
@@ -135,18 +136,16 @@ dig @localhost -p 5333 example3.com
 ;; connection timed out; no servers could be reached
 ```
 
-If we query for domain that is not in the list like *marca.com* we ask the IP to the customDNSServer and send the IP to the client
+If we query for domain that is not in the list like _marca.com_ we ask the IP to the customDNSServer and send the IP to the client
 
 ```bash
 22:36:36.598 Querying DNS (80.58.61.250) for domain: marca.com. Responding IP 34.147.120.111
 ```
 
-
 and the following response to the client:
 
-
 ```bash
-dig @localhost -p 5333 marca.com  
+dig @localhost -p 5333 marca.com
 
 ; <<>> DiG 9.10.6 <<>> @localhost -p 5333 marca.com
 ; (2 servers found)
