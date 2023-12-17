@@ -58,15 +58,15 @@ const rcodeList = {
 const blockedDomains = [
 	{
 		name: "example.com",
-		rcode: rcodeList["REFUSED"],
+		rcode: rcodeList.REFUSED,
 	},
 	{
 		name: "example2.com",
-		rcode: rcodeList["SERVFAIL"],
+		rcode: rcodeList.SERVFAIL,
 	},
 	{
 		name: "example3.com",
-		rcode: rcodeList["TIMEOUT"],
+		rcode: rcodeList.TIMEOUT,
 	},
 ];
 
