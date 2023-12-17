@@ -80,16 +80,6 @@ function getRCodeForDomain(domain) {
 	return (entry = blockedDomains.find((entry) => entry.name === domain));
 }
 
-// function buscarValorPorNombre(nombre) {
-// 	// Verificar si la cadena existe en la asociación
-// 	if (rcodeList.hasOwnProperty(nombre)) {
-// 		return rcodeList[nombre];
-// 	} else {
-// 		return "No se encontró la cadena en la asociación";
-// 		process.exit(1);
-// 	}
-// }
-
 function obtenerNombrePorValor(valor) {
 	for (const nombre in rcodeList) {
 		if (rcodeList[nombre] === valor) return nombre;
@@ -164,10 +154,6 @@ const server = dns2.createServer({
 	},
 });
 
-server.on("request", (request, response, rinfo) => {
-	//console.log("Peticion: " + request.header.id, request.questions[0]);
-});
-
 server.on("requestError", (error) => {
 	console.log("Client sent an invalid request", error);
 });
@@ -176,10 +162,6 @@ server.on("listening", () => {
 	debug(
 		`Started DNS server in addess ${pc.green(server.addresses().udp.address)}:${pc.green(server.addresses().udp.port)}`
 	);
-});
-
-server.on("close", () => {
-	console.log("server closed");
 });
 
 server.listen({
