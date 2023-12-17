@@ -55,12 +55,11 @@ To execute the server you only need to type:
 node DNSserver.js
 ```
 
-If we query for example.com we get the following logs in the server
+If we query for domain *example2.com* we get the following logs in the server
 
 ```bash
-{ udp: { address: '0.0.0.0', family: 'IPv4', port: 5333 } }
-Domain example.com is blocked. Responding with ERROR 5
-64701 { name: 'example.com', type: 1, class: 1 }
+22:30:17.375 Started DNS server in addess 0.0.0.0:5333
+22:32:04.229 Domain example.com is blocked. Responding with REFUSED (5)
 ```
 and the following response to the client:
 
@@ -85,14 +84,62 @@ $ dig @localhost -p 5333 example.com
 ```
 
 
-if we query for a domianin different from example.com and example2.com we get the following logs in the server
+If we query for domain *example2.com* we get the following logs in the server
 
 ```bash
-{ udp: { address: '0.0.0.0', family: 'IPv4', port: 5333 } }
-35099 { name: 'marca.com', type: 1, class: 1 }
-Querying DNS (80.58.61.250) for domain: marca.com
+22:30:17.375 Started DNS server in addess 0.0.0.0:5333
+22:33:13.400 Domain example2.com is blocked. Responding with SERVFAIL (2)
 ```
 and the following response to the client:
+
+```bash
+dig @localhost -p 5333 example2.com
+
+; <<>> DiG 9.10.6 <<>> @localhost -p 5333 example2.com
+; (2 servers found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: SERVFAIL, id: 2855
+;; flags: qr rd ad; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0
+;; WARNING: recursion requested but not available
+
+;; QUESTION SECTION:
+;example2.com.                  IN      A
+
+;; Query time: 1 msec
+;; SERVER: 127.0.0.1#5333(127.0.0.1)
+;; WHEN: Sun Dec 17 22:33:13 CET 2023
+;; MSG SIZE  rcvd: 30
+```
+
+If we query for domain *example3.com* we get the following logs in the server (we see 3 queries because dig try 3 times wiht 5 seconds between them)
+
+```bash
+22:34:49.356 Domain example3.com is blocked. No responding so we must get a TIMEOUT in the DNS client
+22:34:55.364 Domain example3.com is blocked. No responding so we must get a TIMEOUT in the DNS client
+22:35:01.372 Domain example3.com is blocked. No responding so we must get a TIMEOUT in the DNS client
+```
+
+And no response is given to the client
+
+```bash
+dig @localhost -p 5333 example3.com
+
+; <<>> DiG 9.10.6 <<>> @localhost -p 5333 example3.com
+; (2 servers found)
+;; global options: +cmd
+;; connection timed out; no servers could be reached
+```
+
+If we query for domain that is not in the list like *marca.com* we ask the IP to the customDNSServer and send the IP to the client
+
+```bash
+22:36:36.598 Querying DNS (80.58.61.250) for domain: marca.com. Responding IP 34.147.120.111
+```
+
+
+and the following response to the client:
+
 
 ```bash
 dig @localhost -p 5333 marca.com  
